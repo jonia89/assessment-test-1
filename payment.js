@@ -25,6 +25,7 @@ function checkPersonObject(person) {
 function checkCreditCardObject(creditCard) {
   if (
     creditCard &&
+    creditCard.company != "amex" &&
     creditCard.number &&
     creditCard.cvc &&
     creditCard.number.length === 16
@@ -42,7 +43,7 @@ function checkCreditCardObject(creditCard) {
  * @returns {boolean}
  */
 function checkPaymentObject(payment) {
-  if (payment && typeof payment.sum === "number") {
+  if (payment && typeof payment.sum === "number" && payment.sum >= 0) {
     return true;
   }
   return false;
