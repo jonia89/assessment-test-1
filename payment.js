@@ -1,3 +1,5 @@
+const { json } = require("express");
+
 /**
  * Returns a boolean (true or false) if the person is a valid object
  * according to the data structures spec sheet.
@@ -25,6 +27,7 @@ function checkPersonObject(person) {
 function checkCreditCardObject(creditCard) {
   if (
     creditCard &&
+    creditCard.company != "amex" &&
     creditCard.number &&
     creditCard.cvc &&
     creditCard.number.length === 16
@@ -42,7 +45,7 @@ function checkCreditCardObject(creditCard) {
  * @returns {boolean}
  */
 function checkPaymentObject(payment) {
-  if (payment && typeof payment.sum === "number") {
+  if (payment && typeof payment.sum === "number" && payment.sum >= 0) {
     return true;
   }
   return false;
@@ -59,25 +62,29 @@ async function checkCreditCardValidity(creditCardData) {
   if (!validArgs) {
     return false;
   }
+  try {
+    const result = await fetch(
+      "https://api.pihi-group.com/cc/check-credit-card",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(creditCardData),
+      }
+    );
 
-  const result = await fetch(
-    "https://api.pihi-group.com/cc/check-credit-card",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(creditCardData),
+    const json = await result.json();
+    if (json.validCard) {
+      return true;
+    } else {
+      return false;
     }
-  );
-  const json = await result.json();
-  if (json.validCard) {
-    return true;
-  } else {
+  } catch (error) {
+    console.log("Something went wrong", error);
     return false;
   }
 }
-
 /**
  * Makes a payment with the user's credit card. Returns Promise<boolean>.
  *
@@ -90,18 +97,22 @@ async function makePayment(creditCardData, paymentData) {
   if (!validArgs) {
     return false;
   }
-
-  const result = await fetch("https://api.pihi-group.com/cc/make-payment", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ cc: creditCardData, payment: paymentData }),
-  });
-  const json = await result.json();
-  if (json.ok) {
-    return true;
-  } else {
+  try {
+    const result = await fetch("https://api.pihi-group.com/cc/make-payment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ cc: creditCardData, payment: paymentData }),
+    });
+    const json = await result.json();
+    if (json.ok) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log("Something went wrong", error);
     return false;
   }
 }
