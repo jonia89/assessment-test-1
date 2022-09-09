@@ -104,11 +104,22 @@ describe("objects", () => {
     expect(checkPaymentObject(payment)).toBe(true);
   });
 
-  it.skip("check invalid payment object", () => {
-    const payment = {
-      sum: -1, // Negative sums are invalid in our api.
+  it("check invalid payment object", () => {
+    const payment1 = {
+      sum: -1,
     };
-
-    expect(checkPaymentObject(payment)).toBe(false);
+    const payment2 = {
+      sum: 1,
+    };
+    const payment3 = {
+      sum: 0,
+    };
+    const payment4 = {
+      sum: -1 * 3,
+    };
+    expect(checkPaymentObject(payment1)).toBe(false);
+    expect(checkPaymentObject(payment2)).toBe(true);
+    expect(checkPaymentObject(payment3)).toBe(true);
+    expect(checkPaymentObject(payment4)).toBe(false);
   });
 });
