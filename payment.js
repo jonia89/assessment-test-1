@@ -25,6 +25,7 @@ function checkPersonObject(person) {
 function checkCreditCardObject(creditCard) {
   if (
     creditCard &&
+    creditCard.company != "amex" &&
     creditCard.number &&
     creditCard.cvc &&
     creditCard.number.length === 16
